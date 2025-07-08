@@ -1,0 +1,21 @@
+Lyra: Ich habe den Tempel endlich gefunden. Er ist verlassen, aber voller alter Magie.
+Raenor: Vorsicht, Lyra. In solchen Tempeln lauert oft mehr als nur Staub.
+[Lyra betritt vorsichtig den Tempel und hebt ihr Kristallamulett]
+Lyra: Das Amulett beginnt zu leuchten. Hier muss etwas Besonderes sein.
+
+Erzähler: Die Nacht senkte sich über den alten Tempel von Morrakel. Der Wind trug den Geruch von verbranntem Holz aus dem nahen Dorf.
+
+Raenor: Ich komme nach. Mein Schwert Dämmerlicht wird uns beschützen.
+[Raenor zieht seine Runenklinge]
+
+Lyra: Siehst du diese Inschriften? Sie erzählen von einem verborgenen Schatz.
+Raenor: Das ist die alte Sprache der Magier. Mein Meister hat sie mir einst beigebracht.
+
+[Plötzlich erbebt der Boden]
+Lyra: Was war das? Der ganze Tempel scheint zu erwachen!
+Raenor: Zurück zum Eingang! Schnell!
+
+Erzähler: Die beiden Abenteurer flohen aus dem Tempel, während hinter ihnen die alten Steine zu bröckeln begannen. Der Tempel von Morrakel hatte seine Geheimnisse noch nicht preisgegeben.
+
+Lyra: Das war knapp. Aber ich werde wiederkommen.
+Raenor: Dann nicht allein. Der Tempel ist gefährlicher als wir dachten. 

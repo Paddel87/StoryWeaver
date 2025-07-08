@@ -1,0 +1,35 @@
+# StoryWeaver - Requirements für lokale Story-Analyse
+
+# NLP und Text-Verarbeitung
+spacy>=3.7.0
+nltk>=3.8.0
+
+# Datenverarbeitung
+pandas>=2.0.0
+numpy>=1.24.0
+
+# JSON und Dateiverwaltung
+jsonschema>=4.17.0
+
+# Bildverarbeitung für PNG-Export
+Pillow>=10.0.0
+
+# Text-Ähnlichkeit und Fuzzy-Matching
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.21.0
+
+# Fortschrittsanzeige
+tqdm>=4.65.0
+
+# Logging und Konfiguration
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.3.0
+pytest-cov>=4.0.0
+
+# Streamlit für spätere UI-Entwicklung (optional)
+streamlit>=1.28.0
+
+# Typisierung
+typing-extensions>=4.5.0 

@@ -1,0 +1,26 @@
+Die Reise zum Schwarzen Pass
+
+Lyra Nightshade betrat die Taverne "Zum Goldenen Drachen" in der Handelsstadt Aldermoor.
+Aelon: Lyra! Ich hätte nicht gedacht, dich hier zu sehen.
+Lyra: Aelon, alter Freund. Ich bin auf dem Weg zum Schwarzen Pass.
+
+*Der Wirt bringt zwei Krüge mit Ale*
+
+Aelon: Der Schwarze Pass? Dort oben hausen Banditen und schlimmere Kreaturen.
+Lyra: Ich weiß. Aber dort soll es eine alte Ruine geben. Vielleicht finde ich Hinweise auf den Tempel.
+
+[Lyra zeigt Aelon eine vergilbte Karte]
+
+Aelon: Diese Ruine... ich habe davon gehört. Ein verfallener Wachturm der alten Könige.
+Lyra: Genau. Und mein Kristallamulett reagierte, als ich die Karte berührte.
+
+Ein fremder Mann am Nachbartisch - er lauschte ihrer Unterhaltung.
+Fremder: Verzeiht, aber ich kenne den Schwarzen Pass. Mein Name ist Gareth, Händler aus dem Süden.
+Lyra: Was wisst Ihr über die Ruine?
+
+Gareth: Nicht viel, aber die Einheimischen meiden sie. Sie sprechen von seltsamen Lichtern in der Nacht.
+Aelon hob sein Schwert und prüfte die Klinge.
+Lyra: Dann werden wir vorsichtig sein müssen.
+
+Am nächsten Morgen brachen sie auf. Der Weg führte durch dichten Wald, vorbei an einem klaren Bergbach.
+Die Ruine am Schwarzen Pass war tatsächlich verlassen, aber Lyras Amulett leuchtete erneut. 
