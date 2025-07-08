@@ -74,4 +74,13 @@ assets/images/*.png
 
 # Streamlit
 .streamlit/
-*.pyc 
+*.pyc
+
+# Docker
+.env
+backups/
+
+# User uploads and data
+streamlit_uploads/
+input/*
+!input/.gitkeep 

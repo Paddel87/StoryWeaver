@@ -7,6 +7,32 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [Unveröffentlicht]
 
+### Hinzugefügt
+- **Docker-Unterstützung**
+  - Multi-Stage Dockerfile für optimierte Images
+  - Docker Compose Konfigurationen für Entwicklung und Produktion
+  - Automatisches Caching von spaCy-Modellen
+  - Health Checks und Restart-Policies
+  - Volume-Management für persistente Daten
+  - Makefile mit praktischen Docker-Shortcuts
+  - Ausführliche Docker-Dokumentation (README.Docker.md)
+  
+- **Entwickler-Tools**
+  - GitHub Actions für CI/CD (Tests auf Python 3.8-3.12)
+  - Issue Templates für Bug Reports und Feature Requests
+  - Pull Request Template
+  - Contributing Guidelines (CONTRIBUTING.md)
+  - Conventional Commits Standard
+  
+- **Projektstruktur**
+  - Versionsdatei (VERSION) für einheitliche Versionsverwaltung
+  - Branch-Struktur (main, develop, feature/*)
+  - Erweiterte .gitignore für Docker und Uploads
+
+### Geändert
+- README.md erweitert um Docker-Installation als empfohlene Methode
+- Badges für Version, Lizenz und Python-Kompatibilität hinzugefügt
+
 ### Geplant
 - Web-Scraping für Online-Geschichten
 - KI-Integration für verbesserte Charakteranalyse
@@ -14,7 +40,7 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 - Mehrsprachige Unterstützung (Englisch, Spanisch, Französisch)
 - Benutzerdefinierte Charakterportraits Upload
 
-## [1.0.0] - 2025-07-08
+## [1.0.0] - 2025-01-08
 
 ### Hinzugefügt
 - **Kernfunktionalität**
