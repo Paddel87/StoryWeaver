@@ -15,13 +15,26 @@ StoryWeaver ist ein lokales Python-Tool zur Analyse von dialogbasierten Geschich
 
 ## Installation
 
-### 1. Repository klonen
+### 🐳 Docker (Empfohlen)
+Die einfachste Installation erfolgt über Docker. Siehe [Docker Setup Guide](README.Docker.md) für detaillierte Anweisungen.
+
 ```bash
-git clone https://github.com/yourusername/StoryWeaver.git
+# Schnellstart
+git clone https://github.com/Paddel87/StoryWeaver.git
+cd StoryWeaver
+docker-compose up -d
+# Öffne http://localhost:8501
+```
+
+### Manuelle Installation
+
+#### 1. Repository klonen
+```bash
+git clone https://github.com/Paddel87/StoryWeaver.git
 cd StoryWeaver
 ```
 
-### 2. Virtuelle Umgebung einrichten
+#### 2. Virtuelle Umgebung einrichten
 
 #### Option A: Mit dem Setup-Skript (empfohlen)
 ```bash

@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  storyweaver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: storyweaver-dev
+    
+    # Restart Policy
+    restart: unless-stopped
+    
+    # Port Mapping
+    ports:
+      - "8501:8501"
+    
+    # Environment Variablen
+    environment:
+      - STREAMLIT_THEME=${STREAMLIT_THEME:-Dark}
+      - PROJECT_NAME=${PROJECT_NAME:-StoryWeaver}
+      - PYTHONUNBUFFERED=1
+      - STREAMLIT_SERVER_ENABLE_STATIC_SERVING=true
+    
+    # Volumes für Entwicklung
+    volumes:
+      # Code-Mounting für Live-Änderungen
+      - ./src:/app/src:ro
+      - ./app.py:/app/app.py:ro
+      - ./main.py:/app/main.py:ro
+      
+      # Persistente Daten
+      - ./input:/app/input
+      - ./output:/app/output
+      - ./assets:/app/assets
+      - ./examples:/app/examples:ro
+      - streamlit_uploads:/app/streamlit_uploads
+      
+      # spaCy Model Cache
+      - spacy_models:/root/.cache/spacy
+    
+    # Netzwerk
+    networks:
+      - storyweaver-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health Check ist bereits im Dockerfile definiert
+
+# Benannte Volumes
+volumes:
+  streamlit_uploads:
+    name: storyweaver_uploads
+  spacy_models:
+    name: storyweaver_spacy_cache
+
+# Netzwerk
+networks:
+  storyweaver-network:
+    name: storyweaver_net
+    driver: bridge 
