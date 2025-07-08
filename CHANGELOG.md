@@ -17,8 +17,16 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
   - Makefile mit praktischen Docker-Shortcuts
   - Ausführliche Docker-Dokumentation (README.Docker.md)
   
+- **GitHub Container Registry (GHCR)**
+  - Automatisches Build und Push via GitHub Actions
+  - Multi-Platform Images (linux/amd64, linux/arm64)
+  - Versionierte Tags und latest-Tag
+  - Makefile-Integration für lokales Push zu GHCR
+  - Dokumentation für GHCR-Nutzung
+  
 - **Entwickler-Tools**
   - GitHub Actions für CI/CD (Tests auf Python 3.8-3.12)
+  - GitHub Actions für Docker Build und Push zu GHCR
   - Issue Templates für Bug Reports und Feature Requests
   - Pull Request Template
   - Contributing Guidelines (CONTRIBUTING.md)
@@ -31,6 +39,7 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ### Geändert
 - README.md erweitert um Docker-Installation als empfohlene Methode
+- README.md erweitert um GHCR als primäre Docker-Image-Quelle
 - Badges für Version, Lizenz und Python-Kompatibilität hinzugefügt
 
 ### Geplant
