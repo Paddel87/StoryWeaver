@@ -301,3 +301,108 @@ Bei Problemen:
 1. [GitHub Issues](https://github.com/Paddel87/StoryWeaver/issues)
 2. [Discussions](https://github.com/Paddel87/StoryWeaver/discussions)
 3. Logs mit `docker-compose logs` prüfen 
+
+## Weitere Ressourcen
+
+- [Docker Dokumentation](https://docs.docker.com/)
+- [Docker Compose Dokumentation](https://docs.docker.com/compose/)
+- [Streamlit Deployment Guide](https://docs.streamlit.io/streamlit-cloud/get-started/deploy-an-app)
+
+## GitHub Container Registry (GHCR)
+
+StoryWeaver ist auch über die GitHub Container Registry verfügbar. Dies ermöglicht es, vorgefertigte Images zu verwenden, ohne sie lokal bauen zu müssen.
+
+### Image von GHCR verwenden
+
+```bash
+# Image ziehen
+docker pull ghcr.io/paddel87/storyweaver:latest
+
+# Container starten
+docker run -d -p 8501:8501 \
+  -v $(pwd)/input:/app/input \
+  -v $(pwd)/output:/app/output \
+  ghcr.io/paddel87/storyweaver:latest
+```
+
+### Mit Docker Compose
+
+Erstelle eine `docker-compose.ghcr.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  storyweaver:
+    image: ghcr.io/paddel87/storyweaver:latest
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
+      - ./streamlit_uploads:/app/streamlit_uploads
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+    restart: unless-stopped
+```
+
+### Lokale Entwicklung mit GHCR
+
+Das Makefile enthält praktische Befehle für GHCR:
+
+```bash
+# Bei GHCR anmelden (benötigt GitHub Token)
+make ghcr-login
+
+# Image bauen und taggen
+make ghcr-build
+
+# Image zu GHCR pushen
+make ghcr-push
+
+# Alles in einem Schritt
+make ghcr-all
+
+# Image von GHCR ziehen
+make ghcr-pull
+
+# Container von GHCR Image starten
+make ghcr-run
+```
+
+### Authentifizierung
+
+Für das Pushen von Images zu GHCR benötigst du ein GitHub Personal Access Token:
+
+1. Gehe zu GitHub Settings → Developer settings → Personal access tokens
+2. Erstelle ein neues Token mit den Berechtigungen:
+   - `write:packages` (zum Pushen von Images)
+   - `read:packages` (zum Pullen von Images)
+   - `delete:packages` (optional, zum Löschen von Images)
+
+3. Melde dich an:
+```bash
+echo $GITHUB_TOKEN | docker login ghcr.io -u DEIN_GITHUB_USERNAME --password-stdin
+```
+
+Oder mit GitHub CLI:
+```bash
+gh auth token | docker login ghcr.io -u DEIN_GITHUB_USERNAME --password-stdin
+```
+
+### Verfügbare Tags
+
+- `latest`: Neueste stabile Version vom main Branch
+- `develop`: Aktuelle Entwicklungsversion
+- `v1.0.0`, `v1.1.0`, etc.: Spezifische Versionen
+- `sha-xxxxx`: Commit-spezifische Builds
+
+### CI/CD Integration
+
+Die GitHub Action `.github/workflows/docker-publish.yml` baut und pusht automatisch Images zu GHCR bei:
+- Push auf main Branch → `latest` Tag
+- Push auf develop Branch → `develop` Tag  
+- Neue Version Tags → Versionsspezifische Tags
+- Pull Requests → PR-spezifische Tags
+
+Die Images werden automatisch für `linux/amd64` und `linux/arm64` Architekturen gebaut. 

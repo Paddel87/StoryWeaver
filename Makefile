@@ -97,7 +97,37 @@ stats: ## Zeigt Container-Statistiken
 dev-rebuild: ## Entwicklung mit Rebuild
 	docker-compose up -d --build
 
-dev-fresh: ## Entwicklung von Grund auf neu
+reset: ## Kompletter Reset (Vorsicht!)
 	docker-compose down -v
 	docker-compose build --no-cache
-	docker-compose up -d 
+	docker-compose up -d
+
+# GitHub Container Registry (GHCR) Befehle
+GHCR_REGISTRY := ghcr.io
+GHCR_NAMESPACE := paddel87
+GHCR_IMAGE := $(GHCR_REGISTRY)/$(GHCR_NAMESPACE)/storyweaver
+VERSION := $(shell cat VERSION 2>/dev/null || echo "1.0.0")
+
+ghcr-login: ## Bei GitHub Container Registry anmelden
+	@echo "🔐 Anmeldung bei GitHub Container Registry..."
+	@echo "Verwende: echo $$GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin"
+	@echo "Oder: gh auth token | docker login ghcr.io -u USERNAME --password-stdin"
+
+ghcr-build: ## Baut das Image für GHCR
+	docker build -t $(GHCR_IMAGE):$(VERSION) -t $(GHCR_IMAGE):latest .
+
+ghcr-push: ## Pusht das Image zu GHCR
+	docker push $(GHCR_IMAGE):$(VERSION)
+	docker push $(GHCR_IMAGE):latest
+
+ghcr-pull: ## Zieht das Image von GHCR
+	docker pull $(GHCR_IMAGE):latest
+
+ghcr-run: ## Startet Container von GHCR Image
+	docker run -d -p 8501:8501 \
+		-v $(PWD)/input:/app/input \
+		-v $(PWD)/output:/app/output \
+		--name storyweaver-ghcr \
+		$(GHCR_IMAGE):latest
+
+ghcr-all: ghcr-build ghcr-push ## Baut und pusht zu GHCR 
