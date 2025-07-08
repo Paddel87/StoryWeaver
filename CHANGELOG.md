@@ -7,7 +7,38 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [Unveröffentlicht]
 
+### Geplant
+- Web-Scraping für Online-Geschichten
+- KI-Integration für verbesserte Charakteranalyse
+- Export zu World Anvil und Obsidian
+- Mehrsprachige Unterstützung (Englisch, Spanisch, Französisch)
+- Benutzerdefinierte Charakterportraits Upload
+
+## [1.1.0] - 2025-01-09
+
 ### Hinzugefügt
+- **Streamlit UI Verbesserungen (Phase 1 + 2)**
+  - **Download-Funktionalität**: Direkte Downloads aller Analyseergebnisse als JSON oder ZIP
+  - **Drag & Drop File Upload**: Dateien direkt in die Web-UI hochladen ohne Verzeichnis-Setup
+  - **Batch-Bearbeitung**: Mehrere Charaktere gleichzeitig bearbeiten (Verhaltensweisen, Beschreibungen, Beziehungen)
+  - **Erweiterte Filter**: Nach Häufigkeit, Verhaltensweisen, Beziehungen und Beschreibung filtern
+  - **Smart Selection**: Intelligente Charakterauswahl (Top N, mit Item, ohne Beziehungen)
+  - **Verbesserte Vorschau**: Tab-basierte Ansichten (JSON, Lesbar, Tabelle)
+  - **Batch-Export**: Nur ausgewählte Charaktere exportieren
+  - **Bessere Eingabe-Hilfe**: Dropdown-Menü statt Textfeld, kontextuelle Hilfe
+
+- **Performance-Optimierungen für große Texte**
+  - Batch-Verarbeitung für Dateien >1000 Zeilen
+  - SpaCy-Pipeline-Optimierung (nur benötigte Komponenten)
+  - Erhöhtes Textlimit auf 2 Millionen Zeichen
+  - Speicher-Management mit Garbage Collection
+  - Unterstützung für 600k-800k Token große Geschichten
+
+- **SpaCy-Modell-Flexibilität**
+  - Alle drei deutschen Modelle vorinstalliert (sm, md, lg)
+  - Konfigurierbar über Umgebungsvariable SPACY_MODEL
+  - Standard: de_core_news_md für bessere Balance
+
 - **Docker-Unterstützung**
   - Multi-Stage Dockerfile für optimierte Images
   - Docker Compose Konfigurationen für Entwicklung und Produktion
@@ -95,5 +126,6 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 - Standardbild für alle Charaktere
 - Keine direkte API-Integration
 
-[Unveröffentlicht]: https://github.com/Paddel87/StoryWeaver/compare/v1.0.0...HEAD
+[Unveröffentlicht]: https://github.com/Paddel87/StoryWeaver/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Paddel87/StoryWeaver/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Paddel87/StoryWeaver/releases/tag/v1.0 

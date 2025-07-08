@@ -38,6 +38,9 @@ RUN python -m spacy download de_core_news_sm && \
     python -m spacy download de_core_news_md && \
     python -m spacy download de_core_news_lg
 
+# Setze Standard-SpaCy-Modell (kann überschrieben werden)
+ENV SPACY_MODEL=de_core_news_md
+
 # Verzeichnisse für Volumes erstellen
 RUN mkdir -p /app/input /app/output /app/assets /app/streamlit_uploads
 

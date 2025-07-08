@@ -7,6 +7,7 @@ import argparse
 import logging
 from pathlib import Path
 import sys
+import os
 from tqdm import tqdm
 
 from src.extractors.entity_extractor import EntityExtractor
@@ -143,6 +144,10 @@ class StoryWeaver:
 
 def main():
     """Hauptfunktion mit CLI"""
+    
+    # Standard-SpaCy-Modell aus Umgebungsvariable oder Fallback
+    default_spacy_model = os.getenv('SPACY_MODEL', 'de_core_news_sm')
+    
     parser = argparse.ArgumentParser(
         description="StoryWeaver - Lokale Analyse von dialogbasierten Geschichten",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -154,6 +159,9 @@ Beispiele:
   python main.py examples/ -m en_core_web_sm  # Englisches SpaCy-Modell
   python main.py examples/ -s          # Mit SillyTavern-Export
   python main.py examples/ -s -v       # SillyTavern-Export mit Details
+
+Hinweis: Für große Geschichten (>100k Tokens) wird das mittlere oder große
+SpaCy-Modell empfohlen: -m de_core_news_md oder -m de_core_news_lg
         """
     )
     
@@ -180,8 +188,8 @@ Beispiele:
     parser.add_argument(
         '-m', '--model',
         type=str,
-        default='de_core_news_sm',
-        help='SpaCy-Modell für NLP (Standard: de_core_news_sm)'
+        default=default_spacy_model,
+        help=f'SpaCy-Modell für NLP (Standard: {default_spacy_model}, aus $SPACY_MODEL)'
     )
     
     parser.add_argument(

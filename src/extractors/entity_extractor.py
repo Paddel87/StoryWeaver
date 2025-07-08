@@ -18,6 +18,20 @@ class EntityExtractor:
         """Initialisiert den Extractor mit einem spaCy-Modell"""
         try:
             self.nlp = spacy.load(spacy_model)
+            # Erhöhe das Limit für große Texte
+            self.nlp.max_length = 2000000  # 2 Millionen Zeichen
+            
+            # Deaktiviere nicht benötigte Pipeline-Komponenten für bessere Performance
+            # Behalte nur NER (Named Entity Recognition)
+            disabled_pipes = []
+            for pipe in self.nlp.pipe_names:
+                if pipe not in ["ner", "tok2vec"]:
+                    disabled_pipes.append(pipe)
+            
+            if disabled_pipes:
+                self.nlp.disable_pipes(disabled_pipes)
+                print(f"Deaktivierte Pipeline-Komponenten für bessere Performance: {disabled_pipes}")
+                
         except OSError:
             print(f"SpaCy-Modell '{spacy_model}' nicht gefunden. Installiere es mit:")
             print(f"python -m spacy download {spacy_model}")
@@ -70,18 +84,42 @@ class EntityExtractor:
                     "source_file": str(filepath)
                 })
         
-        # Dann alle Zeilen analysieren
-        for line in chat_lines:
-            self._analyze_line(line, str(filepath))
+        # Verwende Batch-Verarbeitung für große Dateien
+        if len(chat_lines) > 1000:
+            print(f"Verwende Batch-Verarbeitung für {len(chat_lines)} Zeilen...")
+            self._analyze_lines_batch(chat_lines, str(filepath))
+        else:
+            # Bei kleineren Dateien normale Verarbeitung
+            for line in chat_lines:
+                self._analyze_line(line, str(filepath))
     
-    def _analyze_line(self, line: ChatLine, source_file: str):
-        """Analysiert eine einzelne Chat-Zeile"""
-        if not line.content:
-            return
+    def _analyze_lines_batch(self, lines: List[ChatLine], source_file: str, batch_size: int = 500):
+        """Verarbeitet Zeilen in Batches für bessere Performance bei großen Texten"""
+        # Gruppiere Zeilen mit Inhalt
+        lines_with_content = [(i, line) for i, line in enumerate(lines) if line.content]
         
-        # SpaCy-Analyse
-        doc = self.nlp(line.content)
-        
+        # Verarbeite in Batches
+        for i in range(0, len(lines_with_content), batch_size):
+            batch = lines_with_content[i:i + batch_size]
+            
+            # Extrahiere Texte für SpaCy
+            texts = [line.content for _, line in batch]
+            
+            # Nutze pipe() für Batch-Verarbeitung
+            docs = list(self.nlp.pipe(texts, batch_size=50, n_process=1))
+            
+            # Verarbeite Ergebnisse
+            for doc, (idx, line) in zip(docs, batch):
+                self._analyze_doc_and_line(doc, line, source_file)
+                
+            # Gib Speicher frei nach jedem Batch
+            if i % (batch_size * 10) == 0 and i > 0:
+                import gc
+                gc.collect()
+                print(f"Verarbeitet: {i}/{len(lines_with_content)} Zeilen...")
+    
+    def _analyze_doc_and_line(self, doc, line: ChatLine, source_file: str):
+        """Analysiert ein SpaCy-Doc-Objekt zusammen mit der ChatLine"""
         # Named Entities verarbeiten
         for ent in doc.ents:
             if ent.label_ == "PER":  # Person
@@ -101,6 +139,17 @@ class EntityExtractor:
         # Aktionen analysieren
         if line.is_action():
             self._analyze_action(line, doc, source_file)
+    
+    def _analyze_line(self, line: ChatLine, source_file: str):
+        """Analysiert eine einzelne Chat-Zeile"""
+        if not line.content:
+            return
+        
+        # SpaCy-Analyse
+        doc = self.nlp(line.content)
+        
+        # Verwende die gleiche Analyse-Logik
+        self._analyze_doc_and_line(doc, line, source_file)
     
     def _add_character(self, name: str, context: str, source_file: str = None, line_number: int = None):
         """Fügt einen Charakter hinzu oder aktualisiert ihn"""

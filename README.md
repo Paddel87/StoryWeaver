@@ -1,6 +1,6 @@
 # StoryWeaver
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Paddel87/StoryWeaver/releases/tag/v1.0)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Paddel87/StoryWeaver/releases/tag/v1.1.0)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-yellow.svg)](https://www.python.org/)
 
@@ -18,6 +18,15 @@ StoryWeaver ist ein lokales Python-Tool zur Analyse von dialogbasierten Geschich
 - **Beziehungsgraphen** zwischen allen Entitäten
 - **SillyTavern/TavernAI Export** - Erstellt kompatible Charakterkarten
 - **100% lokal** - keine API-Zugriffe erforderlich
+
+### Neue UI-Features (v1.1.0)
+- **📤 Drag & Drop Upload** - Dateien direkt in die Web-UI hochladen
+- **📥 Download-Funktionen** - Alle Ergebnisse als JSON oder ZIP herunterladen
+- **🔧 Batch-Bearbeitung** - Mehrere Charaktere gleichzeitig bearbeiten
+- **🔍 Erweiterte Filter** - Nach Häufigkeit, Verhalten, Beziehungen filtern
+- **🎯 Smart Selection** - Intelligente Auswahl (Top N, mit Item, etc.)
+- **👁️ Verbesserte Vorschau** - JSON, lesbare und tabellarische Ansichten
+- **⚡ Performance** - Optimiert für große Geschichten (600k-800k Tokens)
 
 ## Installation
 
@@ -107,6 +116,23 @@ python main.py examples/ -s
 
 # SillyTavern-Export mit Details
 python main.py examples/ -s -v
+```
+
+### SpaCy-Modell-Konfiguration
+StoryWeaver unterstützt alle drei deutschen SpaCy-Modelle:
+
+| Modell | Größe | Genauigkeit | Empfohlen für |
+|--------|-------|-------------|---------------|
+| `de_core_news_sm` | 15 MB | ~90% | Kleine Texte, schnelle Verarbeitung |
+| `de_core_news_md` | 45 MB | ~91% | **Standard** - Beste Balance |
+| `de_core_news_lg` | 550 MB | ~92% | Große Geschichten (>100k Tokens) |
+
+```bash
+# Modell über Kommandozeile wählen
+python main.py examples/ -m de_core_news_lg
+
+# Oder über Umgebungsvariable (Docker)
+SPACY_MODEL=de_core_news_lg docker-compose up
 ```
 
 ### Kommandozeilenoptionen
@@ -296,12 +322,16 @@ pytest tests/
 Eine interaktive Benutzeroberfläche für StoryWeaver ist jetzt verfügbar!
 
 ### Features der UI
+- **Drag & Drop Upload** - Dateien direkt hochladen ohne Verzeichnis-Setup
 - **Visuelle Darstellung** aller extrahierten Charaktere, Orte und Gegenstände
-- **Interaktive Filter** nach Namen, Gegenständen und Eigenschaften
+- **Erweiterte Filter** nach Namen, Häufigkeit, Verhalten, Beziehungen
+- **Batch-Bearbeitung** - Mehrere Charaktere gleichzeitig bearbeiten
+- **Smart Selection** - Intelligente Auswahl nach verschiedenen Kriterien
 - **Charakter-Bearbeitung** direkt in der Oberfläche
 - **Checkbox-Auswahl** für selektiven Export
-- **Live-Vorschau** der generierten JSON-Daten
+- **Live-Vorschau** in JSON, lesbarer und tabellarischer Form
 - **Ein-Klick-Export** als JSON und/oder PNG
+- **Download-Funktionen** - Alle Ergebnisse direkt herunterladen
 
 ### UI starten
 ```bash
