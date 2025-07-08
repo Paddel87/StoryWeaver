@@ -1,6 +1,12 @@
 # StoryWeaver
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Paddel87/StoryWeaver/releases/tag/v1.0)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.8+-yellow.svg)](https://www.python.org/)
+
 StoryWeaver ist ein lokales Python-Tool zur Analyse von dialogbasierten Geschichten aus Chat-Verläufen. Es extrahiert automatisch Charaktere, Gegenstände und Orte aus Textdateien und erstellt strukturierte JSON-Dateien für die weitere Verwendung.
+
+📋 **[Changelog](CHANGELOG.md)** | 🐛 **[Issues](https://github.com/Paddel87/StoryWeaver/issues)** | 💡 **[Discussions](https://github.com/Paddel87/StoryWeaver/discussions)**
 
 ## Features
 
@@ -306,7 +312,7 @@ MIT License - siehe LICENSE Datei
 
 ## Beitragen
 
-Pull Requests sind willkommen! Für größere Änderungen öffnen Sie bitte zuerst ein Issue.
+Pull Requests sind willkommen! Bitte lies unsere [Contributing Guidelines](CONTRIBUTING.md) für Details zum Entwicklungsprozess.
 
 ## Autoren
 
