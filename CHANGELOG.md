@@ -7,6 +7,19 @@ und dieses Projekt verwendet [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [Unveröffentlicht]
 
+### Hinzugefügt
+- **JSON-Unterstützung für strukturierte Daten**
+  - Import von Charakteren, Dialogen und Beziehungen als strukturierte JSON-Dateien
+  - Verschiedene JSON-Formate werden unterstützt (Charakterlisten, Dialoglisten, etc.)
+  - Beispiel-Template `examples/character_template.json` zur Referenz
+  - Verbesserte UI mit detaillierten Informationen zu JSON-Formaten
+  
+- **Verbesserte Entity-Merger-Logik**
+  - Intelligentere Normalisierung von Entitätsnamen zur Reduzierung von Duplikaten
+  - Erweiterte Erkennung grammatikalischer Variationen (z.B. "Das Seil", "Dem Seil")
+  - Verbesserte Basisextraktion für Gegenstände und Pluralformerkennung
+  - Optimierte Zusammenführung ähnlicher Orte und Charaktere
+
 ### Geplant
 - Web-Scraping für Online-Geschichten
 - KI-Integration für verbesserte Charakteranalyse
