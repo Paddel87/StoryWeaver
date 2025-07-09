@@ -59,8 +59,8 @@ if 'analyzed' not in st.session_state:
     st.session_state.analyzed = False
 if 'characters' not in st.session_state:
     st.session_state.characters = {}
-if 'items' not in st.session_state:
-    st.session_state.items = {}
+if 'story_items' not in st.session_state:
+    st.session_state.story_items = {}
 if 'locations' not in st.session_state:
     st.session_state.locations = {}
 if 'dialog_data' not in st.session_state:
@@ -93,8 +93,8 @@ def analyze_stories(input_dir: Path, similarity_threshold: int = 80):
             extractor = EntityExtractor()
             merger = EntityMerger(similarity_threshold)
             
-            # Finde alle Text-Dateien
-            chat_files = list(input_dir.glob("*.txt")) + list(input_dir.glob("*.md"))
+            # Finde alle unterstützten Dateien (inkl. JSON)
+            chat_files = list(input_dir.glob("*.txt")) + list(input_dir.glob("*.md")) + list(input_dir.glob("*.json"))
             
             if not chat_files:
                 st.error(f"Keine Chat-Dateien in {input_dir} gefunden!")
@@ -117,7 +117,7 @@ def analyze_stories(input_dir: Path, similarity_threshold: int = 80):
             
             # Speichere im Session State
             st.session_state.characters = merged_characters
-            st.session_state.items = merged_items
+            st.session_state.story_items = merged_items
             st.session_state.locations = merged_locations
             st.session_state.dialog_data = extractor.get_dialog_data()
             st.session_state.analyzed = True
@@ -150,6 +150,12 @@ def process_uploaded_files(uploaded_files, similarity_threshold: int = 80):
             for i, uploaded_file in enumerate(uploaded_files):
                 status_text.text(f"Analysiere: {uploaded_file.name}")
                 
+                # Zeige Dateityp an
+                if uploaded_file.name.lower().endswith('.json'):
+                    status_text.text(f"Analysiere JSON: {uploaded_file.name}")
+                else:
+                    status_text.text(f"Analysiere Text: {uploaded_file.name}")
+                
                 # Erstelle temporäre Datei
                 with tempfile.NamedTemporaryFile(mode='w', suffix=uploaded_file.name, delete=False, encoding='utf-8') as tmp_file:
                     # Lese Inhalt und schreibe in temporäre Datei
@@ -159,6 +165,7 @@ def process_uploaded_files(uploaded_files, similarity_threshold: int = 80):
                 
                 # Verarbeite die temporäre Datei
                 try:
+                    # Extrahiere Entitäten
                     extractor.extract_from_file(Path(tmp_path))
                 finally:
                     # Lösche temporäre Datei
@@ -174,7 +181,7 @@ def process_uploaded_files(uploaded_files, similarity_threshold: int = 80):
             
             # Speichere im Session State
             st.session_state.characters = merged_characters
-            st.session_state.items = merged_items
+            st.session_state.story_items = merged_items
             st.session_state.locations = merged_locations
             st.session_state.dialog_data = extractor.get_dialog_data()
             st.session_state.analyzed = True
@@ -674,7 +681,7 @@ def display_characters_tab():
             if st.button("📦 Alles als ZIP herunterladen", use_container_width=True):
                 zip_data = create_zip_download(
                     st.session_state.characters,
-                    st.session_state.items,
+                    st.session_state.story_items,
                     st.session_state.locations
                 )
                 st.download_button(
@@ -803,13 +810,13 @@ def display_items_tab():
     """Zeigt den Gegenstände-Tab an"""
     st.header("⚔️ Gegenstände")
     
-    if not st.session_state.items:
+    if not st.session_state.story_items:
         st.info("Keine Gegenstände gefunden.")
         return
     
     # Gruppiere nach Typ
     items_by_type = {}
-    for name, item in st.session_state.items.items():
+    for name, item in st.session_state.story_items.items():
         item_type = item.item_type or "Sonstige"
         if item_type not in items_by_type:
             items_by_type[item_type] = []
@@ -834,11 +841,11 @@ def display_items_tab():
                     st.write(f"Erwähnungen: {item.frequency}")
     
     # Download-Option
-    if st.session_state.items:
+    if st.session_state.story_items:
         st.markdown("---")
         col1, col2 = st.columns(2)
         with col1:
-            items_data = {name: item.to_dict() for name, item in st.session_state.items.items()}
+            items_data = {name: item.to_dict() for name, item in st.session_state.story_items.items()}
             create_json_download(items_data, "alle_gegenstaende.json")
 
 
@@ -1144,14 +1151,30 @@ def main():
                 **Wo müssen die Dateien liegen?**
                 - Im `input/` Ordner des Projekts
                 - Oder im `examples/` Ordner (Beispieldateien)
-                - Unterstützte Formate: `.txt` und `.md`
+                - Unterstützte Formate: `.txt`, `.md` und `.json`
                 
                 **Beispielstruktur:**
                 ```
                 input/
                 ├── geschichte1.txt
                 ├── kapitel2.md
+                ├── charakter.json
                 └── epilog.txt
+                ```
+                
+                **JSON-Format:**
+                JSON-Dateien können strukturierte Charakterdaten enthalten:
+                ```json
+                {
+                  "name": "Lyra",
+                  "description": "Eine mutige Kämpferin mit roten Haaren",
+                  "dialog": [
+                    {"speaker": "Lyra", "content": "Wir müssen den Wald durchqueren."}
+                  ],
+                  "relationships": [
+                    {"name": "Elias", "relationship": "Freund und Reisegefährte"}
+                  ]
+                }
                 ```
                 """)
         
@@ -1161,7 +1184,7 @@ def main():
             
             uploaded_files = st.file_uploader(
                 "Story-Dateien auswählen",
-                type=['txt', 'md'],
+                type=['txt', 'md', 'json'],
                 accept_multiple_files=True,
                 help="Ziehe Dateien hierher oder klicke zum Auswählen"
             )
@@ -1182,6 +1205,12 @@ def main():
             Unterstützte Formate:
             - `.txt` - Textdateien
             - `.md` - Markdown-Dateien
+            - `.json` - JSON-Strukturierte Daten mit Charakteren, Dialog und Beziehungen
+            
+            **JSON-Vorteile:**
+            JSON-Dateien können strukturierte Daten enthalten und werden direkt interpretiert,
+            ohne die Notwendigkeit einer NLP-basierten Extraktion. Dies reduziert das Problem
+            grammatikalischer Variationen und doppelter Entitäten erheblich.
             """)
         
         # Gemeinsame Einstellungen
@@ -1227,7 +1256,7 @@ def main():
             st.success("✅ Daten geladen")
             st.metric("Charaktere", len(st.session_state.characters))
             st.metric("Orte", len(st.session_state.locations))
-            st.metric("Gegenstände", len(st.session_state.items))
+            st.metric("Gegenstände", len(st.session_state.story_items))
         else:
             st.info("Bitte analysiere zuerst Story-Dateien")
         
@@ -1272,10 +1301,24 @@ def main():
             4. **Auswählen:** Wähle Charaktere für den Export aus
             5. **Exportieren:** Gehe zum Export-Tab und erstelle deine Charakterkarten
             
-            **Unterstützte Formate:**
+            **Unterstützte Textformate:**
             - Dialog mit Doppelpunkt: `Lyra: Hallo!`
+            - Dialog mit Bindestrich: `Lyra - Hallo!`
             - Aktionen in Klammern: `[Lyra öffnet die Tür]`
+            - Aktionen mit Sternchen: `*Lyra öffnet die Tür*`
             - Erzählertext
+            
+            **JSON-Format:**
+            Alternativ kannst du strukturierte JSON-Dateien verwenden:
+            ```json
+            {
+              "name": "Lyra",
+              "description": "Mutige Abenteurerin",
+              "dialog": [
+                {"speaker": "Lyra", "content": "Lasst uns aufbrechen!"}
+              ]
+            }
+            ```
             """)
 
 

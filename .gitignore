@@ -66,6 +66,7 @@ test_output/
 assets/images/*.png
 *.json
 !requirements.txt
+!examples/*.json
 
 # Temporary files
 *.tmp

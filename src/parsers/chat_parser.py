@@ -1,8 +1,10 @@
 """
 Chat-Parser für StoryWeaver
-Erkennt verschiedene Formate von Chat-Verläufen
+Erkennt verschiedene Formate von Chat-Verläufen (Text und JSON)
 """
 import re
+import json
+import logging
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,19 +54,115 @@ class ChatParser:
         self.lines: List[ChatLine] = []
     
     def parse_file(self, filepath: Path) -> List[ChatLine]:
-        """Parst eine einzelne Chat-Datei"""
+        """Parst eine einzelne Chat-Datei basierend auf dem Dateityp"""
         self.lines = []
         
-        with open(filepath, 'r', encoding='utf-8') as f:
-            for line_number, raw_line in enumerate(f, 1):
-                line = raw_line.strip()
-                if not line:  # Leere Zeilen überspringen
-                    continue
-                
-                chat_line = self._parse_line(line_number, line)
-                self.lines.append(chat_line)
+        if not filepath.exists():
+            logging.error(f"Datei nicht gefunden: {filepath}")
+            return []
         
-        return self.lines
+        # Dateiendung überprüfen und entsprechenden Parser aufrufen
+        file_extension = filepath.suffix.lower()
+        
+        if file_extension == '.json':
+            return self.parse_json_file(filepath)
+        else:
+            # Text-Parser für .txt und .md
+            with open(filepath, 'r', encoding='utf-8') as f:
+                for line_number, raw_line in enumerate(f, 1):
+                    line = raw_line.strip()
+                    if not line:  # Leere Zeilen überspringen
+                        continue
+                    
+                    chat_line = self._parse_line(line_number, line)
+                    self.lines.append(chat_line)
+            
+            return self.lines
+            
+    def parse_json_file(self, file_path: Path) -> List[ChatLine]:
+        """Parst eine JSON-Datei in ChatLine-Objekte"""
+        chat_lines = []
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Verschiedene JSON-Formate erkennen und verarbeiten
+                
+                # Format 1: Liste von Dialog-Objekten
+                if isinstance(data, list) and all(isinstance(item, dict) for item in data):
+                    for idx, item in enumerate(data):
+                        if 'speaker' in item and 'content' in item:
+                            line = ChatLine(
+                                line_number=idx+1,
+                                speaker=item['speaker'],
+                                content=item['content'],
+                                raw_text=json.dumps(item),
+                                line_type=item.get('type', 'dialog')
+                            )
+                            chat_lines.append(line)
+                
+                # Format 2: Charakterobjekt mit Dialog-Array
+                elif isinstance(data, dict) and 'dialog' in data and isinstance(data['dialog'], list):
+                    for idx, entry in enumerate(data['dialog']):
+                        if isinstance(entry, dict) and 'content' in entry:
+                            speaker = entry.get('speaker', data.get('name', 'Unknown'))
+                            line = ChatLine(
+                                line_number=idx+1,
+                                speaker=speaker,
+                                content=entry['content'],
+                                raw_text=json.dumps(entry),
+                                line_type=entry.get('type', 'dialog')
+                            )
+                            chat_lines.append(line)
+                
+                # Format 3: Einfache Charakter-Beschreibung
+                elif isinstance(data, dict) and 'name' in data:
+                    # Charakter als einzelne Zeile extrahieren
+                    char_name = data['name']
+                    # Sammle alle relevanten Felder
+                    description_parts = []
+                    
+                    for key in ['description', 'personality', 'background', 'traits']:
+                        if key in data and data[key]:
+                            description_parts.append(f"{key.capitalize()}: {data[key]}")
+                    
+                    content = "\n".join(description_parts)
+                    
+                    if content:
+                        line = ChatLine(
+                            line_number=1,
+                            speaker=char_name,
+                            content=content,
+                            raw_text=json.dumps(data),
+                            line_type='description'
+                        )
+                        chat_lines.append(line)
+                
+                # Charakter-Beziehungen extrahieren, falls vorhanden
+                if isinstance(data, dict) and 'relationships' in data and isinstance(data['relationships'], list):
+                    char_name = data.get('name', 'Unknown')
+                    for rel_idx, rel in enumerate(data['relationships']):
+                        if isinstance(rel, dict) and 'name' in rel and 'relationship' in rel:
+                            content = f"Beziehung zu {rel['name']}: {rel['relationship']}"
+                            line = ChatLine(
+                                line_number=len(chat_lines) + rel_idx + 1,
+                                speaker=char_name,
+                                content=content,
+                                raw_text=json.dumps(rel),
+                                line_type='relationship'
+                            )
+                            chat_lines.append(line)
+                
+                self.lines.extend(chat_lines)
+                return chat_lines
+                
+        except json.JSONDecodeError:
+            logging.error(f"Fehler beim Parsen der JSON-Datei: {file_path}")
+        except Exception as e:
+            logging.error(f"Unerwarteter Fehler beim Parsen von {file_path}: {str(e)}")
+            
+        return chat_lines
     
     def _parse_line(self, line_number: int, text: str) -> ChatLine:
         """Parst eine einzelne Zeile und erkennt ihren Typ"""

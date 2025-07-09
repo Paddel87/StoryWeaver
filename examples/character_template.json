@@ -1,0 +1,40 @@
+{
+  "name": "Elias Dunkelsturm",
+  "description": "Ein geheimnisvoller Magier mit dunklem Umhang und leuchtend blauen Augen. Er spricht leise, aber mit Autorität.",
+  "personality": "Zurückhaltend, nachdenklich und vorsichtig. Zeigt selten seine wahren Gefühle, aber ist loyal gegenüber Freunden.",
+  "background": "Stammt aus dem kleinen Dorf Nebeltal, wo er als Kind von einem wandernden Zauberer ausgebildet wurde. Hat seine Heimat verlassen, nachdem ein magisches Experiment schiefging.",
+  "traits": "Intelligent, wissbegierig, manchmal stur",
+  "items": ["Zauberstab aus Ebenholz", "Altes Zauberbuch", "Blauer Kristallamulett", "Lederbeutel mit Kräutern"],
+  "relationships": [
+    {
+      "name": "Lyra Morgenstern",
+      "relationship": "Reisegefährtin und Vertraute"
+    },
+    {
+      "name": "Magierrat von Silberturm",
+      "relationship": "Gespanntes Verhältnis, wurde ausgestoßen"
+    }
+  ],
+  "dialog": [
+    {
+      "speaker": "Elias",
+      "content": "Wir sollten vorsichtig sein. Diese Ruinen bergen mehr Gefahren als nur zerfallene Steine.",
+      "type": "dialog"
+    },
+    {
+      "speaker": "Elias",
+      "content": "öffnet sein Zauberbuch und murmelt leise eine Beschwörung",
+      "type": "action"
+    },
+    {
+      "speaker": "Lyra",
+      "content": "Kannst du uns durch den magischen Schild führen?",
+      "type": "dialog"
+    },
+    {
+      "speaker": "Elias",
+      "content": "Ja, aber es wird nicht einfach. Der Zauber verlangt ein Opfer.",
+      "type": "dialog"
+    }
+  ]
+}

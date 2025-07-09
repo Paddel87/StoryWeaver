@@ -38,20 +38,49 @@ class EntityExtractor:
             raise
         
         # Listen von Schlüsselwörtern für verschiedene Kategorien
+        # REDUZIERT auf wirklich relevante Story-Gegenstände
         self.item_keywords = {
-            'waffen': ['schwert', 'dolch', 'stab', 'bogen', 'pfeil', 'speer', 'axt', 'klinge'],
-            'schmuck': ['amulett', 'ring', 'kette', 'armband', 'krone', 'diadem'],
-            'werkzeuge': ['schlüssel', 'seil', 'fackel', 'karte', 'kompass', 'flasche'],
-            'magisch': ['kristall', 'stein', 'orb', 'zauberstab', 'runen', 'artefakt'],
-            'kleidung': ['mantel', 'umhang', 'robe', 'stiefel', 'handschuhe', 'rüstung']
+            'waffen': ['schwert', 'dolch', 'klinge', 'messer'],
+            'schmuck': ['halskette', 'armband', 'ring'],
+            'werkzeuge': ['schlüssel'],
+            'magisch': ['kristall', 'amulett', 'zauberstab'],
+            'fesselung': ['seil', 'kette', 'fessel', 'handschellen', 'manschetten']
         }
         
         self.location_keywords = {
-            'gebäude': ['tempel', 'turm', 'burg', 'schloss', 'haus', 'hütte', 'palast', 'ruine'],
-            'natur': ['wald', 'berg', 'tal', 'see', 'fluss', 'höhle', 'klippe', 'wiese'],
-            'siedlung': ['stadt', 'dorf', 'markt', 'hafen', 'straße', 'platz', 'brücke'],
-            'räume': ['zimmer', 'saal', 'kammer', 'halle', 'keller', 'gang', 'raum']
+            'gebäude': ['schloss', 'turm', 'kerker', 'verlies', 'kammer'],
+            'räume': ['dungeon', 'spielzimmer', 'studio']
         }
+        
+        # Körper- und Handlungsbegriffe, die NICHT als Gegenstände erkannt werden sollen
+        self.body_and_action_terms = {
+            'hand', 'hände', 'fuß', 'füße', 'arm', 'arme', 'bein', 'beine',
+            'kopf', 'hals', 'schulter', 'brust', 'rücken', 'bauch', 'hüfte',
+            'handgelenk', 'handgelenke', 'knöchel', 'fußgelenk', 'fußgelenke',
+            'finger', 'zehen', 'knie', 'ellbogen', 'position', 'haltung',
+            'knoten', 'schlinge', 'schlaufe', 'wicklung', 'bindung', 'fesselung',
+            'bewegung', 'druck', 'spannung', 'gefühl', 'berührung', 'griff'
+        }
+        
+        # Erweitere Common Words
+        self.common_words = {
+            'der', 'die', 'das', 'ein', 'eine', 'ich', 'du', 'er', 'sie', 'es', 'wir', 'ihr',
+            'mein', 'dein', 'sein', 'unser', 'euer', 'von', 'zu', 'mit', 'auf', 'in', 'an',
+            'und', 'oder', 'aber', 'doch', 'wenn', 'dann', 'dass', 'weil', 'als', 'wie',
+            'nicht', 'kein', 'keine', 'sehr', 'viel', 'mehr', 'wenig', 'alle', 'jeder',
+            'mann', 'frau', 'herr', 'dame', 'person', 'mensch', 'körper',
+            'oben', 'unten', 'vorne', 'hinten', 'links', 'rechts', 'mitte',
+            'erste', 'zweite', 'dritte', 'letzte', 'nächste'
+        }
+        
+        # Minimale Länge für Entitätsnamen
+        self.min_name_length = 3
+        
+        # Mindesthäufigkeit für finale Aufnahme (wird später in der Merge-Phase angewendet)
+        self.min_frequency = 2
+        
+        # Maximale Textlänge für SpaCy-Verarbeitung
+        self.MAX_TEXT_LENGTH = 1000000
         
         # Container für extrahierte Entitäten
         self.characters: Dict[str, Character] = {}
@@ -154,7 +183,15 @@ class EntityExtractor:
     def _add_character(self, name: str, context: str, source_file: str = None, line_number: int = None):
         """Fügt einen Charakter hinzu oder aktualisiert ihn"""
         name = name.strip()
-        if not name or len(name) < 2:
+        if not name or len(name) < self.min_name_length:
+            return
+        
+        # Prüfe auf Common Words
+        if name.lower() in self.common_words:
+            return
+        
+        # Ignoriere Namen die nur aus Zahlen bestehen
+        if name.isdigit():
             return
         
         # Normalisiere den Namen (erste Buchstaben groß)
@@ -182,7 +219,9 @@ class EntityExtractor:
     def _add_location(self, name: str, context: str, source_file: str, line_number: int):
         """Fügt einen Ort hinzu oder aktualisiert ihn"""
         name = name.strip()
-        if not name or len(name) < 2:
+        
+        # Verwende die neue Validierungsmethode
+        if not self._is_valid_location(name, context):
             return
         
         # Normalisiere den Namen
@@ -200,18 +239,19 @@ class EntityExtractor:
         for category, keywords in self.item_keywords.items():
             for keyword in keywords:
                 if keyword in text_lower:
-                    # Versuche, den vollständigen Gegenstandsnamen zu extrahieren
+                    # Präzisere Muster - nur direkte Modifikatoren
                     patterns = [
-                        rf'([\w\s]{{1,20}}?{keyword}[\w\s]{{0,10}})',  # Wörter vor und nach dem Keyword
-                        rf'({keyword}[\w\s]{{0,20}})',  # Keyword am Anfang
-                        rf'([\w\s]{{1,20}}{keyword})'   # Keyword am Ende
+                        rf'\b(\w+\s+{keyword})\b',  # Ein Wort vor dem Keyword
+                        rf'\b({keyword}\s+\w+)\b',  # Ein Wort nach dem Keyword
+                        rf'\b({keyword})\b'          # Nur das Keyword selbst
                     ]
                     
                     for pattern in patterns:
                         matches = re.finditer(pattern, text_lower)
                         for match in matches:
                             item_name = match.group(1).strip()
-                            if item_name and len(item_name) > 2:
+                            # Verwende die neue Validierungsmethode
+                            if item_name and self._is_valid_item(item_name, line.content):
                                 self._add_item(item_name, category, line.raw_text, source_file, line.line_number)
                                 break
     
@@ -222,18 +262,19 @@ class EntityExtractor:
         for category, keywords in self.location_keywords.items():
             for keyword in keywords:
                 if keyword in text_lower:
-                    # Ähnliche Muster wie bei Gegenständen
+                    # Präzisere Muster für Orte
                     patterns = [
-                        rf'([\w\s]{{1,20}}?{keyword}[\w\s]{{0,10}})',
-                        rf'({keyword}[\w\s]{{0,20}})',
-                        rf'([\w\s]{{1,20}}{keyword})'
+                        rf'\b(\w+\s+{keyword})\b',  # Ein Wort vor dem Keyword
+                        rf'\b({keyword}\s+\w+)\b',  # Ein Wort nach dem Keyword
+                        rf'\b({keyword})\b'          # Nur das Keyword selbst
                     ]
                     
                     for pattern in patterns:
                         matches = re.finditer(pattern, text_lower)
                         for match in matches:
                             location_name = match.group(1).strip()
-                            if location_name and len(location_name) > 2:
+                            # Verwende die neue Validierungsmethode
+                            if location_name and self._is_valid_location(location_name, line.content):
                                 self._add_location(location_name.title(), line.raw_text, source_file, line.line_number)
                                 # Setze den Typ
                                 if location_name.title() in self.locations:
@@ -286,3 +327,187 @@ class EntityExtractor:
     def get_dialog_data(self) -> Dict[str, List[Dict]]:
         """Gibt die gesammelten Dialog-Daten zurück"""
         return self.dialog_data 
+
+    def _is_valid_item(self, name, text):
+        """Überprüft, ob ein erkannter Gegenstand valide ist"""
+        name_lower = name.lower()
+        
+        # Zu kurze Namen
+        if len(name) < 3:
+            return False
+            
+        # Häufige Wörter
+        if name_lower in self.common_words:
+            return False
+            
+        # Körperteile und Handlungsbegriffe ausschließen
+        if name_lower in self.body_and_action_terms:
+            return False
+            
+        # Einzelbuchstaben oder nur Zahlen
+        if len(name) == 1 or name.isdigit():
+            return False
+            
+        # Prüfe ob es nur eine Richtungsangabe ist
+        if name_lower in ['oben', 'unten', 'vorne', 'hinten', 'links', 'rechts']:
+            return False
+            
+        # Prüfe ob es ein generischer Begriff ist
+        generic_terms = {'objekt', 'gegenstand', 'ding', 'sache', 'material', 'stück'}
+        if name_lower in generic_terms:
+            return False
+            
+        return True
+    
+    def _is_valid_location(self, name, text):
+        """Überprüft, ob ein erkannter Ort valide ist"""
+        name_lower = name.lower()
+        
+        # Zu kurze Namen  
+        if len(name) < 3:
+            return False
+            
+        # Häufige Wörter
+        if name_lower in self.common_words:
+            return False
+            
+        # Generische Ortsangaben
+        generic_locations = {
+            'hier', 'dort', 'überall', 'nirgends', 'irgendwo',
+            'nähe', 'ferne', 'umgebung', 'gegend', 'bereich',
+            'stelle', 'platz', 'ort', 'position', 'lage'
+        }
+        if name_lower in generic_locations:
+            return False
+            
+        # Körperteile sind keine Orte
+        if name_lower in self.body_and_action_terms:
+            return False
+            
+        return True 
+
+    def _looks_like_item(self, text: str, context: str) -> bool:
+        """Prüft zusätzlich ob ein Text wirklich ein Gegenstand sein könnte"""
+        text_lower = text.lower()
+        
+        # Prüfe ob es eine Handlung/Aktion beschreibt
+        action_indicators = ['en', 'ung', 'tion', 'heit', 'keit', 'schaft']
+        for suffix in action_indicators:
+            if text_lower.endswith(suffix):
+                return False
+        
+        # Prüfe ob es in einem typischen Gegenstandskontext steht
+        item_contexts = ['nutzt', 'verwendet', 'hält', 'nimmt', 'legt', 'bindet mit', 'fesselt mit']
+        context_lower = context.lower()
+        
+        for indicator in item_contexts:
+            if indicator in context_lower and text_lower in context_lower:
+                return True
+        
+        # Standardmäßig false für unklare Fälle
+        return False 
+
+    def extract_items(self, text: str):
+        """Erweiterte Gegenstandsextraktion mit NLP und kontextspezifischer Validierung"""
+        items = {}
+        
+        # Begrenze Textlänge für SpaCy
+        text_chunk = text[:self.MAX_TEXT_LENGTH] if hasattr(self, 'MAX_TEXT_LENGTH') else text[:1000000]
+        
+        # 1. Keyword-basierte Suche (sehr spezifisch)
+        for category, keywords in self.item_keywords.items():
+            for keyword in keywords:
+                pattern = rf'\b(\w*{keyword}\w*)\b'
+                matches = re.finditer(pattern, text_chunk, re.IGNORECASE)
+                for match in matches:
+                    item_name = match.group(1)
+                    if self._is_valid_item(item_name, text_chunk):
+                        item_key = item_name.lower()
+                        if item_key not in items:
+                            items[item_key] = {
+                                'name': item_name,
+                                'category': category,
+                                'count': 0,
+                                'contexts': []
+                            }
+                        items[item_key]['count'] += 1
+                        
+                        # Kontext extrahieren
+                        start = max(0, match.start() - 50)
+                        end = min(len(text_chunk), match.end() + 50)
+                        context = text_chunk[start:end].strip()
+                        if context not in items[item_key]['contexts']:
+                            items[item_key]['contexts'].append(context)
+        
+        # 2. NLP-basierte Suche (sehr restriktiv)
+        doc = self.nlp(text_chunk)
+        for ent in doc.ents:
+            if ent.label_ in ['MISC', 'PRODUCT'] and len(ent.text) >= 3:
+                # Strenge Validierung
+                if (self._is_valid_item(ent.text, text_chunk) and 
+                    self._looks_like_item(ent.text, ent.sent.text)):
+                    item_key = ent.text.lower()
+                    
+                    # Skip wenn schon durch Keywords gefunden
+                    if item_key not in items:
+                        items[item_key] = {
+                            'name': ent.text,
+                            'category': 'sonstige',
+                            'count': 1,
+                            'contexts': [ent.sent.text.strip()]
+                        }
+        
+        return items
+    
+    def extract_locations(self, text: str):
+        """Erweiterte Ortsextraktion mit NLP und kontextspezifischer Validierung"""
+        locations = {}
+        
+        # Begrenze Textlänge für SpaCy
+        text_chunk = text[:self.MAX_TEXT_LENGTH] if hasattr(self, 'MAX_TEXT_LENGTH') else text[:1000000]
+        
+        # 1. Keyword-basierte Suche (sehr spezifisch)
+        for category, keywords in self.location_keywords.items():
+            for keyword in keywords:
+                pattern = rf'\b(\w*{keyword}\w*)\b'
+                matches = re.finditer(pattern, text_chunk, re.IGNORECASE)
+                for match in matches:
+                    location_name = match.group(1)
+                    if self._is_valid_location(location_name, text_chunk):
+                        location_key = location_name.lower()
+                        if location_key not in locations:
+                            locations[location_key] = {
+                                'name': location_name.title(),
+                                'category': category,
+                                'count': 0,
+                                'contexts': []
+                            }
+                        locations[location_key]['count'] += 1
+                        
+                        # Kontext extrahieren
+                        start = max(0, match.start() - 50)
+                        end = min(len(text_chunk), match.end() + 50)
+                        context = text_chunk[start:end].strip()
+                        if context not in locations[location_key]['contexts']:
+                            locations[location_key]['contexts'].append(context)
+        
+        # 2. NLP-basierte Suche (sehr restriktiv für bekannte Orte)
+        doc = self.nlp(text_chunk)
+        for ent in doc.ents:
+            if ent.label_ in ['LOC', 'GPE'] and len(ent.text) >= 4:
+                # Strenge Validierung
+                if self._is_valid_location(ent.text, text_chunk):
+                    location_key = ent.text.lower()
+                    
+                    # Skip wenn schon durch Keywords gefunden
+                    if location_key not in locations:
+                        # Nur sehr spezifische Orte hinzufügen
+                        if any(kw in location_key for kw in ['schloss', 'turm', 'kammer', 'verlies']):
+                            locations[location_key] = {
+                                'name': ent.text.title(),
+                                'category': 'sonstige',
+                                'count': 1,
+                                'contexts': [ent.sent.text.strip()]
+                            }
+        
+        return locations 
